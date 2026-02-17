@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>AI Resume Analyzer</h1>
+        <p class="subtitle">Analyze your resume against job descriptions instantly</p>
+
+        <form method="POST">
+            <textarea name="resume" placeholder="Paste Your Resume Here..." required></textarea>
+            <textarea name="job_desc" placeholder="Paste Job Description Here..." required></textarea>
+            <button type="submit">Analyze Resume</button>
+        </form>
+
+        {% if match is not none %}
+        <div class="result-card">
+            <h2>Match Score: {{ match }}%</h2>
+
+            <div class="skills-section">
+
+                <div class="skills-box">
+                    <h3>Matching Skills</h3>
+                    <ul>
+                        {% for skill in common %}
+                            <li>{{ skill }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="skills-box">
+                    <h3>Missing Skills</h3>
+                    <ul>
+                        {% for skill in missing %}
+                            <li>{{ skill }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</htm

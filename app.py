@@ -133,13 +133,14 @@ def analyze():
     # Render Result Page
     # -----------------------------------
     return render_template(
-        "result.html",
-        score=final_score,
-        matched_skills=matched_skills,
-        missing_skills=missing_skills,
-        suggestions=suggestions,
-        structure_feedback=structure_feedback
-    )
+    "index.html",
+    score=final_score,
+    matched_skills=matched_skills,
+    missing_skills=missing_skills,
+    suggestions=suggestions,
+    structure_feedback=structure_feedback
+)
+
 
 
 # -----------------------------

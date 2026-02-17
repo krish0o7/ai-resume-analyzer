@@ -52,6 +52,21 @@ button:hover {
     background: #45a049;
     transform: scale(1.05);
 }
+.progress-bar {
+    width: 100%;
+    height: 15px;
+    background: #2c2f48;
+    border-radius: 10px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
 
 .result-card {
     margin-top: 30px;
@@ -83,4 +98,16 @@ li {
     margin: 5px 0;
     padding: 5px;
     border-radius: 5px;
+}
+.skill-box {
+    padding: 10px;
+    margin: 8px 0;
+    background: #2a2d45;
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.skill-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }

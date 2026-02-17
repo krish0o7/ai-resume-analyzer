@@ -4,28 +4,56 @@
     <title>AI Resume Analyzer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
     <div class="container">
         <h1>AI Resume Analyzer</h1>
         <p class="subtitle">Analyze your resume against job descriptions instantly</p>
 
-        <form method="POST">
-            <textarea name="resume" placeholder="Paste Your Resume Here..." required></textarea>
-            <textarea name="job_desc" placeholder="Paste Job Description Here..." required></textarea>
+        <!-- FORM -->
+        <form action="/analyze" method="POST">
+            <textarea 
+                name="resume_text" 
+                placeholder="Paste Your Resume Here..." 
+                required></textarea>
+
+            <textarea 
+                name="job_description" 
+                placeholder="Paste Job Description Here..." 
+                required></textarea>
+
             <button type="submit">Analyze Resume</button>
         </form>
 
-        {% if match is not none %}
+        <!-- RESULTS SECTION -->
+        {% if score is not none %}
         <div class="result-card">
-            <h2>Match Score: {{ match }}%</h2>
 
+           {% if score is not none %}
+
+    {% if score < 40 %}
+        <h2 style="color:#ef4444;">Match Score: {{ score }}%</h2>
+    {% elif score < 70 %}
+        <h2 style="color:#facc15;">Match Score: {{ score }}%</h2>
+    {% else %}
+        <h2 style="color:#22c55e;">Match Score: {{ score }}%</h2>
+    {% endif %}
+
+{% endif %}
+
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ score }}%;"></div>
+            </div>
+
+            <!-- Skills Section -->
             <div class="skills-section">
 
                 <div class="skills-box">
                     <h3>Matching Skills</h3>
                     <ul>
-                        {% for skill in common %}
+                        {% for skill in matched_skills %}
                             <li>{{ skill }}</li>
                         {% endfor %}
                     </ul>
@@ -34,17 +62,38 @@
                 <div class="skills-box">
                     <h3>Missing Skills</h3>
                     <ul>
-                        {% for skill in missing %}
+                        {% for skill in missing_skills %}
                             <li>{{ skill }}</li>
                         {% endfor %}
                     </ul>
                 </div>
 
             </div>
+
+            <!-- Suggestions -->
+            <div class="skills-box">
+                <h3>Improvement Suggestions</h3>
+                <ul>
+                    {% for suggestion in suggestions %}
+                        <li>{{ suggestion }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Resume Structure Feedback -->
+            <div class="skills-box">
+                <h3>Resume Structure Check</h3>
+                <ul>
+                    {% for item in structure_feedback %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
         </div>
         {% endif %}
 
     </div>
 
 </body>
-</htm
+</html>

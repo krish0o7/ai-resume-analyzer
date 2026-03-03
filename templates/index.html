@@ -1,99 +1,820 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Resume Analyzer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RecruitIQ — ATS Resume Analyzer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg:#03060f;
+  --s1:#0a0f1e;
+  --s2:#0f1629;
+  --border:rgba(255,255,255,0.06);
+  --accent:#6366f1;
+  --accent2:#8b5cf6;
+  --cyan:#06b6d4;
+  --green:#22c55e;
+  --red:#f43f5e;
+  --yellow:#f59e0b;
+  --text:#f1f5f9;
+  --muted:#475569;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body {
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── PARTICLE CANVAS ── */
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* ── GRID OVERLAY ── */
+body::before {
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+  background-size:60px 60px;
+}
+
+body::after {
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 0%,   rgba(99,102,241,0.15) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 100%,  rgba(6,182,212,0.1)  0%,transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50% 50%,   rgba(139,92,246,0.05) 0%,transparent 60%);
+}
+
+.page{position:relative;z-index:1;}
+
+/* ── NAV ── */
+nav {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 52px;
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);
+  position:sticky;top:0;z-index:100;
+  background:rgba(3,6,15,0.7);
+}
+.nav-left{display:flex;align-items:center;gap:12px;}
+.logo-wrap {
+  position:relative;width:40px;height:40px;
+}
+.logo-wrap .ring {
+  position:absolute;inset:0;border-radius:12px;
+  border:1.5px solid transparent;
+  background:linear-gradient(135deg,var(--accent),var(--cyan)) border-box;
+  -webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:destination-out;mask-composite:exclude;
+  animation:spinRing 4s linear infinite;
+}
+@keyframes spinRing{to{transform:rotate(360deg);}}
+.logo-inner {
+  position:absolute;inset:3px;border-radius:9px;
+  background:linear-gradient(135deg,rgba(99,102,241,0.3),rgba(6,182,212,0.2));
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;letter-spacing:-.3px;}
+.brand span{
+  background:linear-gradient(90deg,#a5b4fc,#67e8f9);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.nbadge {
+  display:flex;align-items:center;gap:5px;
+  background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);
+  color:#a5b4fc;font-size:11px;font-weight:600;
+  padding:4px 12px;border-radius:20px;letter-spacing:.5px;
+}
+.nbadge .pulse {
+  width:6px;height:6px;border-radius:50%;background:#4ade80;
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+
+/* ── HERO ── */
+.hero {
+  text-align:center;
+  padding:80px 24px 60px;
+  position:relative;
+}
+.hero-glow {
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:600px;height:300px;
+  background:radial-gradient(ellipse,rgba(99,102,241,0.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-chip {
+  display:inline-flex;align-items:center;gap:7px;
+  background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(6,182,212,0.08));
+  border:1px solid rgba(99,102,241,0.3);
+  color:#a5b4fc;font-size:11px;font-weight:700;
+  padding:6px 16px;border-radius:20px;letter-spacing:1px;
+  text-transform:uppercase;margin-bottom:24px;
+}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--cyan));}
+
+.hero h1 {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(32px,6vw,60px);
+  font-weight:700;letter-spacing:-2px;line-height:1.05;
+  margin-bottom:16px;
+}
+.hero h1 .line1{
+  background:linear-gradient(120deg,#e0e7ff 0%,#a5b4fc 50%,#67e8f9 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero h1 .line2{color:rgba(255,255,255,0.15);}
+.hero-sub{
+  color:var(--muted);font-size:15px;line-height:1.7;
+  max-width:500px;margin:0 auto 36px;
+}
+
+/* ── TRUST BADGES ── */
+.trust-row{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:16px;}
+.trust-item{
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;color:var(--muted);font-weight:500;
+}
+.trust-item .ti{color:#4ade80;font-size:13px;}
+
+/* ── MAIN WRAPPER ── */
+.main{max-width:900px;margin:0 auto;padding:0 24px 100px;}
+
+/* ── UPLOAD CARD ── */
+.upload-card {
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,rgba(10,15,30,0.9),rgba(15,22,41,0.9));
+  border:1px solid rgba(99,102,241,0.2);
+  border-radius:24px;padding:36px;margin-bottom:28px;
+  backdrop-filter:blur(12px);
+  transition:border-color .3s,box-shadow .3s;
+}
+.upload-card:hover{
+  border-color:rgba(99,102,241,0.4);
+  box-shadow:0 0 60px rgba(99,102,241,0.1), inset 0 0 60px rgba(99,102,241,0.03);
+}
+.card-shimmer {
+  position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:conic-gradient(transparent,transparent,transparent,rgba(99,102,241,0.05));
+  animation:shimmer 6s linear infinite;pointer-events:none;
+}
+@keyframes shimmer{to{transform:rotate(360deg);}}
+
+.uc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.uc-title{display:flex;align-items:center;gap:12px;}
+.uc-icon {
+  width:44px;height:44px;border-radius:12px;font-size:20px;
+  background:linear-gradient(135deg,rgba(99,102,241,0.25),rgba(6,182,212,0.15));
+  border:1px solid rgba(99,102,241,0.3);
+  display:flex;align-items:center;justify-content:center;
+}
+.uc-title h2{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;}
+.uc-title p{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* TABS */
+.tabs{display:flex;gap:6px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:4px;}
+.tab{
+  padding:7px 18px;border-radius:9px;font-size:12px;font-weight:600;
+  cursor:pointer;border:none;background:transparent;color:var(--muted);
+  transition:all .2s;
+}
+.tab.active{
+  background:linear-gradient(135deg,rgba(99,102,241,0.25),rgba(139,92,246,0.2));
+  border:1px solid rgba(99,102,241,0.35);color:#c4b5fd;
+}
+
+/* TEXTAREA */
+.ta-wrap{position:relative;margin-top:4px;}
+textarea {
+  width:100%;height:200px;
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:14px;color:var(--text);
+  font-size:13px;font-family:'Inter',sans-serif;
+  padding:16px 18px;resize:vertical;
+  transition:border-color .2s,box-shadow .2s;line-height:1.7;
+}
+textarea:focus{
+  outline:none;
+  border-color:rgba(99,102,241,0.4);
+  box-shadow:0 0 0 3px rgba(99,102,241,0.08),inset 0 0 20px rgba(99,102,241,0.02);
+}
+textarea::placeholder{color:var(--muted);}
+.ta-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:8px;padding:0 2px;
+}
+.wc-badge{
+  font-size:11px;font-weight:600;padding:3px 10px;border-radius:8px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  transition:all .3s;
+}
+.ta-tip{font-size:11px;color:var(--muted);}
+
+/* UPLOAD ZONE */
+.upload-zone {
+  display:none;border:2px dashed rgba(99,102,241,0.25);
+  border-radius:14px;padding:48px 24px;text-align:center;
+  cursor:pointer;transition:all .3s;
+  background:rgba(99,102,241,0.02);
+}
+.upload-zone.show{display:block;}
+.upload-zone:hover{border-color:rgba(99,102,241,0.5);background:rgba(99,102,241,0.05);}
+.uz-icon{font-size:44px;margin-bottom:12px;display:block;}
+.uz-text{color:var(--muted);font-size:13px;line-height:1.7;}
+.uz-text b{color:#a5b4fc;}
+.file-name{color:#4ade80;font-size:12px;font-weight:600;margin-top:10px;}
+input[type=file]{display:none;}
+
+/* ANALYZE BTN */
+.btn-wrap{margin-top:24px;}
+.btn-analyze {
+  position:relative;width:100%;overflow:hidden;
+  background:linear-gradient(135deg,#4f46e5,#7c3aed,#0e7490);
+  background-size:200% 200%;
+  animation:gradShift 4s ease infinite;
+  color:white;border:none;
+  padding:17px;font-size:15px;font-weight:700;
+  border-radius:14px;cursor:pointer;letter-spacing:.3px;
+  box-shadow:0 8px 32px rgba(99,102,241,0.3),0 0 0 1px rgba(255,255,255,0.05);
+  transition:transform .2s,box-shadow .2s;
+}
+@keyframes gradShift{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+.btn-analyze:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(99,102,241,0.45);}
+.btn-analyze:active{transform:translateY(0);}
+.btn-analyze .btn-shine {
+  position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+  animation:shine 3s ease-in-out infinite;
+}
+@keyframes shine{to{left:150%;}}
+.btn-inner{display:flex;align-items:center;justify-content:center;gap:8px;}
+
+/* ERROR */
+.error-box {
+  display:flex;align-items:center;gap:12px;
+  background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.2);
+  border-radius:14px;padding:16px 20px;margin-bottom:20px;
+  font-size:13px;color:#fb7185;
+}
+
+/* ── DIVIDER ── */
+.section-divider{
+  display:flex;align-items:center;gap:16px;
+  margin:36px 0 28px;
+}
+.sd-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(99,102,241,0.3),transparent);}
+.sd-badge{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);
+  color:#a5b4fc;font-size:11px;font-weight:700;
+  padding:5px 14px;border-radius:20px;letter-spacing:.8px;white-space:nowrap;
+  text-transform:uppercase;
+}
+
+/* ── SCORE HERO ── */
+.score-hero {
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,rgba(10,15,30,0.95),rgba(15,22,41,0.95));
+  border:1px solid rgba(99,102,241,0.2);
+  border-radius:24px;padding:36px 40px;margin-bottom:24px;
+  display:flex;align-items:center;gap:48px;flex-wrap:wrap;
+}
+.score-hero-bg {
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 80% at 0% 50%, rgba(99,102,241,0.08) 0%, transparent 60%);
+}
+.score-ring-wrap{position:relative;flex-shrink:0;}
+.score-ring-outer {
+  width:160px;height:160px;position:relative;
+}
+.score-ring-outer svg{transform:rotate(-90deg);}
+.ring-track{fill:none;stroke:rgba(255,255,255,0.05);stroke-width:12;}
+.ring-bg{fill:none;stroke:rgba(99,102,241,0.1);stroke-width:12;}
+.ring-fill{
+  fill:none;stroke-width:12;stroke-linecap:round;
+  stroke-dasharray:440;stroke-dashoffset:440;
+  transition:stroke-dashoffset 1.6s cubic-bezier(.4,0,.2,1),stroke .3s;
+  filter:drop-shadow(0 0 8px currentColor);
+}
+.ring-fill.green{stroke:url(#gGrad);}
+.ring-fill.yellow{stroke:url(#yGrad);}
+.ring-fill.red{stroke:url(#rGrad);}
+.ring-label{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.ring-num{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;line-height:1;}
+.ring-sub{font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:.8px;text-transform:uppercase;}
+
+.score-info{flex:1;min-width:220px;}
+.score-verdict{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:26px;font-weight:700;margin-bottom:8px;
+}
+.score-desc{color:var(--muted);font-size:13px;line-height:1.7;max-width:380px;}
+.score-pills{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;}
+.spill{
+  display:flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:10px;padding:7px 13px;font-size:12px;font-weight:500;
+}
+.spill .dot{width:7px;height:7px;border-radius:50%;}
+
+/* ── STAT CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+@media(max-width:500px){.stats-row{grid-template-columns:1fr 1fr;}}
+.stat-card{
+  background:rgba(10,15,30,0.8);
+  border:1px solid var(--border);
+  border-radius:16px;padding:20px;text-align:center;
+  position:relative;overflow:hidden;transition:transform .2s,border-color .2s;
+}
+.stat-card:hover{transform:translateY(-3px);border-color:rgba(99,102,241,0.25);}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--c,var(--accent)),transparent);
+}
+.stat-icon{font-size:22px;margin-bottom:6px;}
+.stat-val{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;line-height:1;color:var(--c,var(--accent));}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:5px;font-weight:500;}
+
+/* ── BREAKDOWN ── */
+.breakdown-section{margin-bottom:24px;}
+.section-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:14px;font-weight:700;color:#e2e8f0;
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.breakdown-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:580px){.breakdown-grid{grid-template-columns:1fr;}}
+.bcard{
+  background:rgba(10,15,30,0.8);border:1px solid var(--border);
+  border-radius:16px;padding:18px 20px;transition:border-color .2s;
+}
+.bcard:hover{border-color:rgba(99,102,241,0.2);}
+.bcard-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.bcard-name{font-size:12px;font-weight:600;color:#cbd5e1;display:flex;align-items:center;gap:6px;}
+.bcard-pts{font-size:13px;font-weight:700;}
+.bbar{height:5px;background:rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;}
+.bbar-fill{height:100%;border-radius:6px;transition:width 1.4s cubic-bezier(.4,0,.2,1);width:0;}
+
+/* ── TWO COL ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+@media(max-width:620px){.two-col{grid-template-columns:1fr;}}
+
+/* ── GCARD ── */
+.gcard{
+  background:rgba(10,15,30,0.8);border:1px solid var(--border);
+  border-radius:18px;padding:22px;transition:border-color .2s,box-shadow .2s;
+}
+.gcard:hover{border-color:rgba(99,102,241,0.2);box-shadow:0 0 30px rgba(99,102,241,0.06);}
+.gcard-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.gh-icon{
+  width:30px;height:30px;border-radius:8px;font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.2);
+}
+.gh-title{font-size:13px;font-weight:700;color:#e2e8f0;}
+.gh-count{margin-left:auto;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,0.06);}
+
+.tags{display:flex;flex-wrap:wrap;gap:7px;}
+.tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;padding:4px 10px;border-radius:8px;
+  transition:transform .15s;cursor:default;
+}
+.tag:hover{transform:scale(1.05);}
+.tag.matched{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:#4ade80;}
+.tag.missing{background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.2);color:#fb7185;}
+.tag.verb{background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);color:#a5b4fc;}
+
+/* ── STRUCTURE ── */
+.struct-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:440px){.struct-grid{grid-template-columns:1fr;}}
+.sitem{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 13px;border-radius:10px;
+  font-size:12px;font-weight:600;transition:transform .15s;
+}
+.sitem:hover{transform:translateX(3px);}
+.sitem.ok{background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.15);color:#4ade80;}
+.sitem.bad{background:rgba(244,63,94,0.07);border:1px solid rgba(244,63,94,0.15);color:#fb7185;}
+.sitem-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.sitem.ok .sitem-dot{background:#22c55e;}
+.sitem.bad .sitem-dot{background:#f43f5e;}
+
+/* ── SUGGESTIONS ── */
+.sug-list{display:flex;flex-direction:column;gap:8px;}
+.sug-item{
+  display:flex;align-items:flex-start;gap:10px;
+  background:rgba(245,158,11,0.05);
+  border:1px solid rgba(245,158,11,0.15);
+  border-left:3px solid var(--yellow);
+  border-radius:10px;padding:11px 14px;
+  font-size:12px;color:#fde68a;line-height:1.6;
+  transition:background .2s;
+}
+.sug-item:hover{background:rgba(245,158,11,0.09);}
+.si{flex-shrink:0;font-size:13px;margin-top:1px;}
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;padding:32px 24px;
+  border-top:1px solid var(--border);
+  color:var(--muted);font-size:12px;
+}
+footer span{color:#6366f1;}
+</style>
 </head>
-
 <body>
+<canvas id="particles"></canvas>
+<div class="page">
 
-    <div class="container">
-        <h1>AI Resume Analyzer</h1>
-        <p class="subtitle">Analyze your resume against job descriptions instantly</p>
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <div class="logo-wrap">
+      <div class="ring"></div>
+      <div class="logo-inner">🧠</div>
+    </div>
+    <span class="brand">Recruit<span>IQ</span></span>
+  </div>
+  <div class="nav-right">
+    <div class="nbadge">
+      <div class="pulse"></div>
+      ATS LIVE
+    </div>
+  </div>
+</nav>
 
-        <!-- FORM -->
-        <form action="/analyze" method="POST">
-            <textarea 
-                name="resume_text" 
-                placeholder="Paste Your Resume Here..." 
-                required></textarea>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-chip"><div class="chip-dot"></div>⚡ AI-Powered ATS Scanner</div>
+  <h1>
+    <div class="line1">Resume Intelligence</div>
+    <div class="line2">at Recruiter Speed</div>
+  </h1>
+  <p class="hero-sub">Drop your resume and get an instant ATS compatibility score, skill gap analysis, and expert-level feedback in seconds.</p>
+  <div class="trust-row">
+    <div class="trust-item"><span class="ti">✦</span> ATS Compatible</div>
+    <div class="trust-item"><span class="ti">✦</span> Skill Gap Analysis</div>
+    <div class="trust-item"><span class="ti">✦</span> Section Scoring</div>
+    <div class="trust-item"><span class="ti">✦</span> Instant Results</div>
+  </div>
+</div>
 
-            <textarea 
-                name="job_description" 
-                placeholder="Paste Job Description Here..." 
-                required></textarea>
+<div class="main">
 
-            <button type="submit">Analyze Resume</button>
-        </form>
+  {% if error %}
+  <div class="error-box">⚠️ {{ error }}</div>
+  {% endif %}
 
-        <!-- RESULTS SECTION -->
-        {% if score is not none %}
-        <div class="result-card">
+  <!-- INPUT CARD -->
+  <form action="/analyze" method="POST" enctype="multipart/form-data">
+  <div class="upload-card">
+    <div class="card-shimmer"></div>
 
-           {% if score is not none %}
-
-    {% if score < 40 %}
-        <h2 style="color:#ef4444;">Match Score: {{ score }}%</h2>
-    {% elif score < 70 %}
-        <h2 style="color:#facc15;">Match Score: {{ score }}%</h2>
-    {% else %}
-        <h2 style="color:#22c55e;">Match Score: {{ score }}%</h2>
-    {% endif %}
-
-{% endif %}
-
-            <!-- Progress Bar -->
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: {{ score }}%;"></div>
-            </div>
-
-            <!-- Skills Section -->
-            <div class="skills-section">
-
-                <div class="skills-box">
-                    <h3>Matching Skills</h3>
-                    <ul>
-                        {% for skill in matched_skills %}
-                            <li>{{ skill }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-                <div class="skills-box">
-                    <h3>Missing Skills</h3>
-                    <ul>
-                        {% for skill in missing_skills %}
-                            <li>{{ skill }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-            </div>
-
-            <!-- Suggestions -->
-            <div class="skills-box">
-                <h3>Improvement Suggestions</h3>
-                <ul>
-                    {% for suggestion in suggestions %}
-                        <li>{{ suggestion }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <!-- Resume Structure Feedback -->
-            <div class="skills-box">
-                <h3>Resume Structure Check</h3>
-                <ul>
-                    {% for item in structure_feedback %}
-                        <li>{{ item }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-
+    <div class="uc-header">
+      <div class="uc-title">
+        <div class="uc-icon">📄</div>
+        <div>
+          <h2>Upload Your Resume</h2>
+          <p>Plain text gives the most accurate ATS score</p>
         </div>
-        {% endif %}
-
+      </div>
+      <div class="tabs">
+        <button type="button" class="tab active" onclick="switchTab('paste')">📋 Paste Text</button>
+        <button type="button" class="tab" onclick="switchTab('upload')">📁 Upload .txt</button>
+      </div>
     </div>
 
+    <!-- PASTE -->
+    <div id="pastePanel">
+      <div class="ta-wrap">
+        <textarea id="rta" name="resume_text"
+          placeholder="Paste your resume here — Name, Email, Phone, LinkedIn, Summary, Education, Experience, Skills, Projects…">{{ resume_text if resume_text else '' }}</textarea>
+      </div>
+      <div class="ta-bar">
+        <span class="ta-tip">💡 Include all sections for highest ATS score</span>
+        <span class="wc-badge" id="wcBadge">0 words</span>
+      </div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="upload-zone" id="uploadPanel" onclick="document.getElementById('fi').click()">
+      <span class="uz-icon">☁️</span>
+      <div class="uz-text">
+        <b>Click to upload</b> your resume<br>
+        Supports <b>.pdf</b> &nbsp;·&nbsp; <b>.docx</b> &nbsp;·&nbsp; <b>.txt</b>
+      </div>
+      <div class="file-name" id="fname"></div>
+      <input type="file" id="fi" name="resume_file" accept=".pdf,.docx,.txt"
+        onchange="document.getElementById('fname').textContent=this.files[0]?.name||''"/>
+    </div>
+
+    <div class="btn-wrap">
+      <button type="submit" class="btn-analyze">
+        <div class="btn-shine"></div>
+        <div class="btn-inner">⚡ Analyze My Resume Now</div>
+      </button>
+    </div>
+  </div>
+  </form>
+
+  <!-- ────── RESULTS ────── -->
+  {% if score is not none %}
+
+  <div class="section-divider">
+    <div class="sd-line"></div>
+    <div class="sd-badge">✦ ATS Analysis Complete</div>
+    <div class="sd-line"></div>
+  </div>
+
+  <!-- SCORE HERO -->
+  <div class="score-hero">
+    <div class="score-hero-bg"></div>
+    <div class="score-ring-wrap">
+      <div class="score-ring-outer">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <defs>
+            <linearGradient id="gGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#4ade80"/>
+            </linearGradient>
+            <linearGradient id="yGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fcd34d"/>
+            </linearGradient>
+            <linearGradient id="rGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#f43f5e"/><stop offset="100%" stop-color="#fb7185"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-track" cx="80" cy="80" r="70"/>
+          <circle class="ring-bg"    cx="80" cy="80" r="70"/>
+          <circle class="ring-fill"  cx="80" cy="80" r="70" id="ringFill"/>
+        </svg>
+        <div class="ring-label">
+          <span class="ring-num" id="ringNum">0</span>
+          <span class="ring-sub">ATS Score</span>
+        </div>
+      </div>
+    </div>
+    <div class="score-info">
+      <div class="score-verdict" id="verdict">Analyzing…</div>
+      <div class="score-desc" id="vdesc"></div>
+      <div class="score-pills">
+        <div class="spill"><div class="dot" style="background:#4ade80"></div>{{ found_skills|length }} Skills Found</div>
+        <div class="spill"><div class="dot" style="background:#fb7185"></div>{{ missing_skills|length }}+ Missing</div>
+        <div class="spill"><div class="dot" style="background:#a5b4fc"></div>{{ word_count }} Words</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card" style="--c:#4ade80">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-val">{{ found_skills|length }}</div>
+      <div class="stat-lbl">Skills Detected</div>
+    </div>
+    <div class="stat-card" style="--c:#a5b4fc">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-val">{{ verbs_found|length }}</div>
+      <div class="stat-lbl">Action Verbs</div>
+    </div>
+    <div class="stat-card" style="--c:{{ '#4ade80' if has_numbers else '#fb7185' }}">
+      <div class="stat-icon">{{ '📊' if has_numbers else '📉' }}</div>
+      <div class="stat-val">{{ 'Yes' if has_numbers else 'No' }}</div>
+      <div class="stat-lbl">Quantified Results</div>
+    </div>
+  </div>
+
+  <!-- BREAKDOWN -->
+  <div class="breakdown-section">
+    <div class="section-title">📊 Score Breakdown</div>
+    <div class="breakdown-grid">
+      {% for label, data in breakdown.items() %}
+      {% set pct = (data.score / data.max * 100)|int %}
+      {% set col = '#4ade80' if pct >= 70 else '#fcd34d' if pct >= 40 else '#fb7185' %}
+      <div class="bcard">
+        <div class="bcard-row">
+          <div class="bcard-name">{{ label }}</div>
+          <div class="bcard-pts" style="color:{{ col }}">{{ data.score }}/{{ data.max }}</div>
+        </div>
+        <div class="bbar">
+          <div class="bbar-fill" style="background:{{ col }};" data-w="{{ pct }}"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="two-col">
+    <div class="gcard">
+      <div class="gcard-header">
+        <div class="gh-icon">✅</div>
+        <div class="gh-title">Skills Found</div>
+        <div class="gh-count" style="color:#4ade80">{{ found_skills|length }}</div>
+      </div>
+      <div class="tags">
+        {% for s in found_skills %}
+          <span class="tag matched">✓ {{ s }}</span>
+        {% else %}
+          <span style="color:var(--muted);font-size:12px;">No known skills detected.</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="gcard">
+      <div class="gcard-header">
+        <div class="gh-icon">➕</div>
+        <div class="gh-title">Consider Adding</div>
+        <div class="gh-count" style="color:#fb7185">{{ missing_skills|length }}+</div>
+      </div>
+      <div class="tags">
+        {% for s in missing_skills %}
+          <span class="tag missing">+ {{ s }}</span>
+        {% else %}
+          <span style="color:#4ade80;font-size:12px;">🎉 All major skills covered!</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION VERBS + STRUCTURE -->
+  <div class="two-col">
+    <div class="gcard">
+      <div class="gcard-header">
+        <div class="gh-icon">🔥</div>
+        <div class="gh-title">Action Verbs Used</div>
+        <div class="gh-count" style="color:#a5b4fc">{{ verbs_found|length }}</div>
+      </div>
+      <div class="tags">
+        {% for v in verbs_found %}
+          <span class="tag verb">{{ v }}</span>
+        {% else %}
+          <span style="color:var(--muted);font-size:12px;">No action verbs found. Add some!</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="gcard">
+      <div class="gcard-header">
+        <div class="gh-icon">📋</div>
+        <div class="gh-title">Section Check</div>
+      </div>
+      <div class="struct-grid">
+        {% for status, name in structure_feedback %}
+        <div class="sitem {{ 'ok' if status == '✔' else 'bad' }}">
+          <div class="sitem-dot"></div>{{ name }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- SUGGESTIONS -->
+  <div class="gcard">
+    <div class="gcard-header">
+      <div class="gh-icon">💡</div>
+      <div class="gh-title">AI Recommendations</div>
+      <div class="gh-count" style="color:var(--yellow)">{{ suggestions|length }}</div>
+    </div>
+    <div class="sug-list">
+      {% for s in suggestions %}
+        <div class="sug-item"><span class="si">→</span> {{ s }}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+
+<footer>Built with ❤️ by <span>RecruitIQ</span> — AI-Powered Resume Intelligence</footer>
+</div>
+
+<script>
+/* ── PARTICLES ── */
+(function(){
+  var c=document.getElementById('particles'),ctx=c.getContext('2d');
+  var W,H,pts=[];
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;}
+  resize(); window.addEventListener('resize',resize);
+  for(var i=0;i<60;i++) pts.push({
+    x:Math.random()*2000,y:Math.random()*1200,
+    vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
+    r:Math.random()*1.5+.5,
+    a:Math.random()*.4+.1
+  });
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(function(p){
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(99,102,241,'+p.a+')';
+      ctx.fill();
+    });
+    // lines
+    for(var i=0;i<pts.length;i++){
+      for(var j=i+1;j<pts.length;j++){
+        var dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        var d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x,pts[i].y);
+          ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.strokeStyle='rgba(99,102,241,'+(0.08*(1-d/120))+')';
+          ctx.lineWidth=.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ── TABS ── */
+function switchTab(t){
+  var pp   = document.getElementById('pastePanel');
+  var up   = document.getElementById('uploadPanel');
+  var tabs = document.querySelectorAll('.tab');
+  var ta   = document.getElementById('rta');
+  if(t==='paste'){
+    pp.style.display = 'block';
+    up.classList.remove('show'); up.style.display = 'none';
+    tabs[0].classList.add('active'); tabs[1].classList.remove('active');
+    ta.disabled = false;   // re-enable so it submits
+  } else {
+    pp.style.display = 'none';
+    up.classList.add('show'); up.style.display = 'block';
+    tabs[1].classList.add('active'); tabs[0].classList.remove('active');
+    ta.disabled = true;    // DISABLE so empty string doesn't override file
+  }
+}
+
+/* ── WORD COUNT ── */
+var rta=document.getElementById('rta');
+var wcb=document.getElementById('wcBadge');
+function updateWC(){
+  if(!rta)return;
+  var w=rta.value.trim().split(/\s+/).filter(Boolean).length;
+  wcb.textContent=w+' words';
+  wcb.style.background=w<150?'rgba(244,63,94,0.15)':w>700?'rgba(245,158,11,0.15)':'rgba(34,197,94,0.12)';
+  wcb.style.borderColor=w<150?'rgba(244,63,94,0.3)':w>700?'rgba(245,158,11,0.3)':'rgba(34,197,94,0.25)';
+  wcb.style.color=w<150?'#fb7185':w>700?'#fcd34d':'#4ade80';
+}
+if(rta){rta.addEventListener('input',updateWC);updateWC();}
+
+/* ── SCORE ANIMATION ── */
+var SCORE={{ score if score is not none else 0 }};
+var HAS={{ 'true' if score is not none else 'false' }};
+if(HAS){
+  var fill=document.getElementById('ringFill');
+  var num=document.getElementById('ringNum');
+  var verdict=document.getElementById('verdict');
+  var vdesc=document.getElementById('vdesc');
+  var C=2*Math.PI*70; // circumference
+
+  var cls=SCORE>=70?'green':SCORE>=40?'yellow':'red';
+  var col=SCORE>=70?'#4ade80':SCORE>=40?'#fcd34d':'#fb7185';
+  fill.classList.add(cls);
+  num.style.color=col;
+
+  setTimeout(function(){
+    fill.style.strokeDashoffset=C-(SCORE/100)*C;
+  },150);
+
+  var cur=0,step=SCORE/70;
+  var iv=setInterval(function(){
+    cur=Math.min(cur+step,SCORE);
+    num.textContent=Math.round(cur);
+    if(cur>=SCORE)clearInterval(iv);
+  },16);
+
+  if(SCORE>=80){verdict.textContent='ATS Ready 🚀';vdesc.textContent='Outstanding resume! Highly compatible with ATS filters. You are a top-tier candidate — apply with full confidence.';}
+  else if(SCORE>=60){verdict.textContent='Good Match 🎯';vdesc.textContent='Strong resume with minor gaps. Follow the AI suggestions below to push your score above 80.';}
+  else if(SCORE>=40){verdict.textContent='Needs Improvement ⚡';vdesc.textContent='Several ATS issues detected. Apply the recommendations to significantly boost your shortlisting chances.';}
+  else{verdict.textContent='High ATS Risk ⚠️';vdesc.textContent='Your resume may be filtered out before a human sees it. Significant improvements are needed right away.';}
+
+  // breakdown bar animation
+  setTimeout(function(){
+    document.querySelectorAll('.bbar-fill').forEach(function(el){
+      el.style.width=el.dataset.w+'%';
+    });
+  },400);
+}
+</script>
 </body>
 </html>
